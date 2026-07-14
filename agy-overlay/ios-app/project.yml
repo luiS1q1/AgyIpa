@@ -14,11 +14,7 @@ targets:
           - "Info.plist"
 
     settings:
-      PRODUCT_BUNDLE_IDENTIFIER: com.antigravity.agy-overlay
+      PRODUCT_BUNDLE_IDENTIFIER: com.antigravity.agyoverlay
       INFOPLIST_FILE: agy-overlay/Info.plist
       SWIFT_VERSION: "5.0"
-      CODE_SIGNING_ALLOWED: NO
-      CODE_SIGNING_REQUIRED: NO
-      CODE_SIGN_IDENTITY: ""
-      CODE_SIGN_ENTITLEMENTS: ""
-      DEVELOPMENT_TEAM: ""
+
