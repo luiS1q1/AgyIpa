@@ -1,0 +1,21 @@
+name: agy-overlay
+options:
+  bundleIdPrefix: com.antigravity
+  minimumXcodeGenVersion: 2.28.0
+
+targets:
+  agy-overlay:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: agy-overlay
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.antigravity.agy-overlay
+      INFOPLIST_FILE: agy-overlay/Info.plist
+      SWIFT_VERSION: "5.0"
+      CODE_SIGNING_ALLOWED: NO
+      CODE_SIGNING_REQUIRED: NO
+      CODE_SIGN_IDENTITY: ""
+      CODE_SIGN_ENTITLEMENTS: ""
+      DEVELOPMENT_TEAM: ""

@@ -1,0 +1,19 @@
+# Xcode / Swift
+*.xcodeproj
+*.xcworkspace
+*.xcarchive
+DerivedData/
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv
+venv/
+env/
+storage/screenshots/*.png
+
+# App generated logs / temp
+.system_generated/

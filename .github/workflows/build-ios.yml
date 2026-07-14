@@ -1,0 +1,49 @@
+name: Build iOS App (Unsigned IPA)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: |
+          cd agy-overlay/ios-app
+          xcodegen generate
+
+      - name: Build Unsigned Archive
+        run: |
+          cd agy-overlay/ios-app
+          xcodebuild archive \
+            -project agy-overlay.xcodeproj \
+            -scheme agy-overlay \
+            -archivePath unsigned.xcarchive \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package IPA
+        run: |
+          cd agy-overlay/ios-app
+          mkdir -p Payload
+          cp -r unsigned.xcarchive/Products/Applications/*.app Payload/
+          zip -r agy-overlay.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agy-overlay-ipa
+          path: agy-overlay/ios-app/agy-overlay.ipa
+          if-no-files-found: error
