@@ -25,7 +25,7 @@ jobs:
       - name: Build Unsigned Archive
         run: |
           cd agy-overlay/ios-app
-          xcodebuild archive \
+          if ! xcodebuild archive \
             -project agy-overlay.xcodeproj \
             -scheme agy-overlay \
             -destination "generic/platform=iOS" \
@@ -33,7 +33,12 @@ jobs:
             -configuration Release \
             CODE_SIGN_IDENTITY="-" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=YES
+            CODE_SIGNING_ALLOWED=YES > build.log 2>&1; then
+            echo "=== BUILD LOG ==="
+            cat build.log
+            exit 74
+          fi
+
 
       - name: Package IPA
         run: |
