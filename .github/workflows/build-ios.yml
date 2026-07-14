@@ -28,6 +28,7 @@ jobs:
           xcodebuild archive \
             -project agy-overlay.xcodeproj \
             -scheme agy-overlay \
+            -destination "generic/platform=iOS" \
             -archivePath unsigned.xcarchive \
             -configuration Release \
             CODE_SIGN_IDENTITY="" \
