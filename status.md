@@ -104,4 +104,11 @@ Dieses Dokument dient der Protokollierung des aktuellen Entwicklungsstands, der 
    - Shortcut wie in [05_shortcut.md](file:///G:/Meine%20Ablage/projects/agyipa/05_shortcut.md) beschrieben erstellen.
    - *Hinweis:* Vergiss nicht, die IP-Adresse deines Servers in [AppState.swift](file:///G:/Meine%20Ablage/projects/agyipa/agy-overlay/ios-app/agy-overlay/Models/AppState.swift) anzupassen, bevor du den Code auf GitHub pushst!
 
+---
 
+## 5. Änderungshistorie & Fehlerbehebung (CI/CD)
+
+* **Build-Fix #1 (Xcode-Format-Konflikt)**: Anheben des GitHub Runners auf `macos-15` (Xcode 16.4), um das von XcodeGen erzeugte Xcode-Projektformat 77 öffnen zu können.
+* **Build-Fix #2 (Ad-Hoc Signing auf iOS 18.5 SDK)**: Deaktivieren des Ad-Hoc Signings (`CODE_SIGNING_ALLOWED=NO`), da dieses im iOS 18.5 SDK ohne Developer Team ungültig ist.
+* **Build-Fix #3 (SwiftUI-Compiler-Fehler)**: Ersetzen der fehlerhaften UIKit-Zuweisungen in `VisualEffectBlur` und Portierung auf natives SwiftUI `.ultraThinMaterial` in [FloatingTextBox.swift](file:///G:/Meine%20Ablage/projects/agyipa/agy-overlay/ios-app/agy-overlay/Views/Components/FloatingTextBox.swift).
+* **Build-Fix #4 (Missing Bundle Identifier)**: Ergänzen der Standard-App-Metadaten-Keys (z.B. `CFBundleIdentifier`, `CFBundleExecutable` etc.) in [Info.plist](file:///G:/Meine%20Ablage/projects/agyipa/agy-overlay/ios-app/agy-overlay/Info.plist), um den `xcodebuild` Archivierungsfehler *"Archive Missing Bundle Identifier"* zu beheben.
