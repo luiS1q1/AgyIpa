@@ -47,9 +47,17 @@ jobs:
           cp -r unsigned.xcarchive/Products/Applications/*.app Payload/
           zip -r agy-overlay.ipa Payload
 
+      - name: Upload Build Log on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: agy-overlay/ios-app/build.log
+
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
           name: agy-overlay-ipa
           path: agy-overlay/ios-app/agy-overlay.ipa
           if-no-files-found: error
+
