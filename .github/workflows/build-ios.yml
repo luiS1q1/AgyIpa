@@ -45,7 +45,7 @@ jobs:
           cd agy-overlay/ios-app
           mkdir -p Payload
           cp -r unsigned.xcarchive/Products/Applications/*.app Payload/
-          zip -r agy-overlay.ipa Payload
+          zip -r -y agy-overlay.ipa Payload
 
       - name: Upload Build Log on Failure
         if: failure()
