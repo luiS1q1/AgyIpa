@@ -32,5 +32,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Diese App benötigt lokalen Netzwerkzugriff, um eine Verbindung zum Antigravity-Server aufzubauen.</string>
 </dict>
 </plist>
