@@ -1,7 +1,10 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 import shutil
+import logging
 from app.config import settings
 from app import tmux_wrapper
 from app.log_watcher import stream_log_lines
@@ -16,6 +19,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    try:
+        form = await request.form()
+        form_dict = {k: v if not isinstance(v, UploadFile) else f"<File: {v.filename}>" for k, v in form.items()}
+    except Exception:
+        form_dict = None
+    logging.error(f"Validation Error detail: {exc.errors()}")
+    logging.error(f"Request Form fields: {form_dict}")
+    print(f"Validation Error detail: {exc.errors()}", flush=True)
+    print(f"Request Form fields: {form_dict}", flush=True)
+    return JSONResponse(
+        status_code=422,
+        content={"detail": exc.errors()},
+    )
 
 # Statisches Verzeichnis mounten, damit Screenshots abgerufen werden können
 app.mount("/storage", StaticFiles(directory=settings.BASE_DIR / "storage"), name="storage")
