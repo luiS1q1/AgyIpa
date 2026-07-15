@@ -46,10 +46,10 @@ struct FloatingTextBox: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .background(
-                VisualEffectBlur(material: .systemChromeMaterial, blendingMode: .withinWindow)
-                    .cornerRadius(32)
-                    .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
+                .systemChromeMaterial
             )
+            .cornerRadius(32)
+            .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
         }
         .padding(.horizontal)
         .padding(.bottom, 16)
@@ -119,20 +119,5 @@ struct FloatingTextBox: View {
                 }
             }
         }.resume()
-    }
-}
-
-// SwiftUI-Hilfsklasse für UIVisualEffectView (Blur-Effekt)
-struct VisualEffectBlur: UIViewRepresentable {
-    var material: UIBlurEffect.Material
-    var blendingMode: UIVisualEffectView.BlendingMode
-    
-    func makeUIView(context: Context) -> UIVisualEffectView {
-        let view = UIVisualEffectView(effect: UIBlurEffect(style: material))
-        return view
-    }
-    
-    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {
-        uiView.effect = UIBlurEffect(style: material)
     }
 }
