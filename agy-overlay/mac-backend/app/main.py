@@ -27,10 +27,22 @@ async def validation_exception_handler(request, exc):
         form_dict = {k: v if not isinstance(v, UploadFile) else f"<File: {v.filename}>" for k, v in form.items()}
     except Exception:
         form_dict = None
+    headers = dict(request.headers)
+    body_length = 0
+    try:
+        body = await request.body()
+        body_length = len(body)
+        body_snippet = body[:200]
+    except Exception:
+        body_snippet = None
     logging.error(f"Validation Error detail: {exc.errors()}")
+    logging.error(f"Request Headers: {headers}")
     logging.error(f"Request Form fields: {form_dict}")
+    logging.error(f"Request Body length: {body_length}, snippet: {body_snippet}")
     print(f"Validation Error detail: {exc.errors()}", flush=True)
+    print(f"Request Headers: {headers}", flush=True)
     print(f"Request Form fields: {form_dict}", flush=True)
+    print(f"Request Body length: {body_length}", flush=True)
     return JSONResponse(
         status_code=422,
         content={"detail": exc.errors()},
