@@ -10,5 +10,5 @@ class AppState: ObservableObject {
     @Published var currentInputText: String = ""
     
     // IP-Adresse des macOS-Servers. Bitte bei Bedarf anpassen.
-    let macServerIP: String = "192.168.178.50"
+    let macServerIP: String = "192.168.178.133"
 }
