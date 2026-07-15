@@ -60,7 +60,7 @@ struct FloatingTextBox: View {
             print("Keine aktive Session-ID")
             return 
         }
-        guard let url = URL(string: "http://\(appState.macServerIP):8000/v1/send") else { return }
+        guard let url = URL(string: "http://\(appState.macServerIP):8080/v1/send") else { return }
         
         appState.isWaitingForResponse = true
         

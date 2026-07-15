@@ -15,7 +15,7 @@ class WebSocketManager {
     }
     
     func connect(sessionId: String) {
-        guard let url = URL(string: "ws://\(appState.macServerIP):8000/v1/stream/\(sessionId)") else { 
+        guard let url = URL(string: "ws://\(appState.macServerIP):8080/v1/stream/\(sessionId)") else { 
             print("Ungültige WebSocket-URL")
             return 
         }

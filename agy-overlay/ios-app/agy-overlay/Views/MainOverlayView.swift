@@ -80,7 +80,7 @@ struct MainOverlayView: View {
     }
     
     private func downloadScreenshot(id: String) {
-        guard let url = URL(string: "http://\(appState.macServerIP):8000/storage/screenshots/\(id).png") else { 
+        guard let url = URL(string: "http://\(appState.macServerIP):8080/storage/screenshots/\(id).png") else { 
             print("Ungültige Screenshot-URL")
             return 
         }
