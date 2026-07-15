@@ -1,5 +1,6 @@
 import subprocess
 import time
+import os
 
 def start_agy_session(session_id: str) -> bool:
     tmux_name = f"agy_{session_id}"
@@ -7,7 +8,8 @@ def start_agy_session(session_id: str) -> bool:
     if res.returncode == 0: 
         return True
     try:
-        subprocess.run(["tmux", "new-session", "-d", "-s", tmux_name, "agy"], check=True)
+        agy_path = os.path.expanduser("~/.local/bin/agy")
+        subprocess.run(["tmux", "new-session", "-d", "-s", tmux_name, agy_path], check=True)
         time.sleep(0.8)
         return True
     except Exception: 
