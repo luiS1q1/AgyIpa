@@ -12,9 +12,6 @@ targets:
       - path: agy-overlay
         excludes:
           - "Info.plist"
-    info:
-      properties:
-        UILaunchScreen: {}
 
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.antigravity.agyoverlay
