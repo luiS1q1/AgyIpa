@@ -23,6 +23,8 @@ struct FloatingTextBox: View {
                     let prompt = appState.currentInputText.trimmingCharacters(in: .whitespacesAndNewlines)
                     if !prompt.isEmpty {
                         appState.currentInputText = ""
+                        // Append locally immediately for instant UI feedback
+                        appState.chatMessages.append(Message(sender: .user, content: prompt, toolName: nil, timestamp: Date()))
                         sendPromptToServer(prompt: prompt)
                     }
                 }) {

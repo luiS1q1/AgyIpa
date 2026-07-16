@@ -95,6 +95,11 @@ class WebSocketManager {
             DispatchQueue.main.async {
                 let sender = MessageSender(rawValue: p.type) ?? .systemError
                 
+                // Skip if it's a duplicate of any existing message (helps avoid duplicating user messages added locally)
+                if self.appState.chatMessages.contains(where: { $0.sender == sender && $0.content.trimmingCharacters(in: .whitespacesAndNewlines) == (p.content ?? "").trimmingCharacters(in: .whitespacesAndNewlines) }) {
+                    return
+                }
+                
                 // Stream-Antworten des Assistenten zusammenführen, falls nacheinander gesendet
                 if sender == .assistant, 
                    let last = self.appState.chatMessages.indices.last, 

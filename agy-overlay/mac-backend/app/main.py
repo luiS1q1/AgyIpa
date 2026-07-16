@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from typing import Optional
 import shutil
 import logging
+import asyncio
 from app.config import settings
 from app import tmux_wrapper
 from app.log_watcher import stream_log_lines
@@ -64,11 +65,28 @@ async def trigger_assistant(session_id: str = Form(...), file: Optional[UploadFi
                 shutil.copyfileobj(file.file, b)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Fehler beim Speichern des Screenshots: {e}")
+            
+    existing_dirs = set()
+    if settings.AGY_BRAIN_DIR.exists():
+        existing_dirs = {d.name for d in settings.AGY_BRAIN_DIR.iterdir() if d.is_dir()}
         
     if not tmux_wrapper.start_agy_session(session_id):
         raise HTTPException(status_code=500, detail="Tmux Session konnte nicht gestartet werden.")
         
-    ACTIVE_SESSIONS[session_id] = {"current_screenshot_path": str(file_path) if file_path else ""}
+    brain_dir_name = None
+    for _ in range(25):
+        await asyncio.sleep(0.2)
+        if settings.AGY_BRAIN_DIR.exists():
+            current_dirs = {d.name for d in settings.AGY_BRAIN_DIR.iterdir() if d.is_dir()}
+            new_dirs = current_dirs - existing_dirs
+            if new_dirs:
+                brain_dir_name = sorted(list(new_dirs))[0]
+                break
+                
+    ACTIVE_SESSIONS[session_id] = {
+        "current_screenshot_path": str(file_path) if file_path else "",
+        "brain_dir_name": brain_dir_name
+    }
     return {"status": "initialized"}
 
 @app.post("/v1/send")
