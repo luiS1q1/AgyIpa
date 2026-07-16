@@ -3,58 +3,74 @@ import SwiftUI
 struct MainOverlayView: View {
     @EnvironmentObject var appState: AppState
     @State private var wsManager: WebSocketManager?
+    @State private var selectedTab: Int = 0
     
     var body: some View {
-        ZStack {
-            // Hintergrundbild: Zeige den Screenshot an
-            if let img = appState.screenshotImage {
-                Image(uiImage: img)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .ignoresSafeArea()
-            } else {
-                Color.black.ignoresSafeArea()
-                VStack(spacing: 20) {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(1.5)
-                    Text("Lade Screenshot...")
-                        .foregroundColor(.white)
-                        .font(.headline)
+        TabView(selection: $selectedTab) {
+            // Tab 1: Chat-Modus
+            ChatModeView()
+                .tabItem {
+                    Label("Chat", systemImage: "message.fill")
                 }
-            }
+                .tag(0)
             
-            // Blur-Overlay (ultra-thin material)
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
-            
-            VStack {
-                // Verbindungsstatus-Indikator
-                HStack {
-                    Circle()
-                        .fill(appState.isConnected ? Color.green : Color.red)
-                        .frame(width: 8, height: 8)
-                    Text(appState.isConnected ? "Verbunden" : "Verbindung getrennt")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    if let sessionId = appState.currentSessionId {
-                        Text("Session: \(sessionId)")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
+            // Tab 2: Screen-Overlay (Shortcut-Modus)
+            ZStack {
+                // Hintergrundbild: Zeige den Screenshot an
+                if let img = appState.screenshotImage {
+                    Image(uiImage: img)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .ignoresSafeArea()
+                } else {
+                    Color.black.ignoresSafeArea()
+                    VStack(spacing: 20) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .scaleEffect(1.5)
+                        Text("Lade Screenshot...")
+                            .foregroundColor(.white)
+                            .font(.headline)
                     }
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 10)
                 
-                // Stream der Log-Nachrichten
-                TranscriptStreamView()
+                // Blur-Overlay (ultra-thin material)
+                Rectangle()
+                    .fill(.ultraThinMaterial)
+                    .ignoresSafeArea()
                 
-                // Text-Eingabefeld am unteren Rand
-                FloatingTextBox()
+                VStack {
+                    // Verbindungsstatus-Indikator
+                    HStack {
+                        Circle()
+                            .fill(appState.isConnected ? Color.green : Color.red)
+                            .frame(width: 8, height: 8)
+                        Text(appState.isConnected ? "Verbunden" : "Verbindung getrennt")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        if let sessionId = appState.currentSessionId {
+                            Text("Session: \(sessionId)")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+                    
+                    // Stream der Log-Nachrichten
+                    TranscriptStreamView()
+                    
+                    // Text-Eingabefeld am unteren Rand
+                    FloatingTextBox()
+                }
             }
+            .tabItem {
+                Label("Screen", systemImage: "macwindow")
+            }
+            .tag(1)
         }
+        .accentColor(.purple)
         .onAppear {
             self.wsManager = WebSocketManager(appState: appState)
         }
@@ -68,13 +84,16 @@ struct MainOverlayView: View {
             
             appState.currentSessionId = id
             
+            // Wechsel automatisch zum Screen-Tab bei Deep-Link-Aufruf
+            selectedTab = 1
+            
             // Verbindung trennen falls bereits eine läuft
             wsManager?.disconnect()
             
             // WebSocket-Verbindung aufbauen
             wsManager?.connect(sessionId: id)
             
-            // Async Image Download von http://[MAC_IP]:8000/storage/screenshots/\(id).png
+            // Async Image Download von http://[MAC_IP]:8080/storage/screenshots/\(id).png
             downloadScreenshot(id: id)
         }
     }

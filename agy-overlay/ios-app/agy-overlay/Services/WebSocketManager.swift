@@ -28,6 +28,42 @@ class WebSocketManager {
         listen()
     }
     
+    func startSessionAndConnect(sessionId: String, isDirectChat: Bool) {
+        if !isDirectChat {
+            self.connect(sessionId: sessionId)
+            return
+        }
+        
+        guard let url = URL(string: "http://\(appState.macServerIP):8080/v1/trigger") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        let boundary = "Boundary-\(UUID().uuidString)"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"session_id\"\r\n\r\n".data(using: .utf8)!)
+        body.append("\(sessionId)\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        request.httpBody = body
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            if let error = error {
+                print("Fehler beim Initialisieren der Chat-Session: \(error.localizedDescription)")
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                DispatchQueue.main.async {
+                    self?.connect(sessionId: sessionId)
+                }
+            } else {
+                print("Server-Fehler bei Initialisierung.")
+            }
+        }.resume()
+    }
+    
     func disconnect() {
         webSocketTask?.cancel(with: .normalClosure, reason: nil)
         DispatchQueue.main.async {
