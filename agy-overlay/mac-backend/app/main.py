@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from typing import Optional
 import shutil
 import logging
 from app.config import settings
@@ -54,25 +55,33 @@ app.mount("/storage", StaticFiles(directory=settings.BASE_DIR / "storage"), name
 ACTIVE_SESSIONS = {}
 
 @app.post("/v1/trigger")
-async def trigger_assistant(session_id: str = Form(...), file: UploadFile = File(...)):
-    file_path = settings.STORAGE_DIR / f"{session_id}.png"
-    try:
-        with open(file_path, "wb") as b:
-            shutil.copyfileobj(file.file, b)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Fehler beim Speichern des Screenshots: {e}")
+async def trigger_assistant(session_id: str = Form(...), file: Optional[UploadFile] = File(None)):
+    file_path = None
+    if file is not None and file.filename:
+        file_path = settings.STORAGE_DIR / f"{session_id}.png"
+        try:
+            with open(file_path, "wb") as b:
+                shutil.copyfileobj(file.file, b)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Fehler beim Speichern des Screenshots: {e}")
         
     if not tmux_wrapper.start_agy_session(session_id):
         raise HTTPException(status_code=500, detail="Tmux Session konnte nicht gestartet werden.")
         
-    ACTIVE_SESSIONS[session_id] = {"current_screenshot_path": str(file_path)}
+    ACTIVE_SESSIONS[session_id] = {"current_screenshot_path": str(file_path) if file_path else ""}
     return {"status": "initialized"}
 
 @app.post("/v1/send")
 async def send_prompt(session_id: str = Form(...), prompt: str = Form(...)):
     if session_id not in ACTIVE_SESSIONS:
         raise HTTPException(status_code=404, detail="Session nicht gefunden.")
-    p = f"Analysiere das Bild unter '{ACTIVE_SESSIONS[session_id]['current_screenshot_path']}'. Befehl: {prompt}"
+    
+    screenshot_path = ACTIVE_SESSIONS[session_id].get("current_screenshot_path", "")
+    if screenshot_path:
+        p = f"Analysiere das Bild unter '{screenshot_path}'. Befehl: {prompt}"
+    else:
+        p = prompt
+        
     if not tmux_wrapper.inject_text(session_id, p):
         raise HTTPException(status_code=500, detail="Text konnte nicht injiziert werden.")
     return {"status": "sent"}
