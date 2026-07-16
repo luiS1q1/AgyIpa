@@ -13,7 +13,7 @@ targets:
         excludes:
           - "Info.plist"
     info:
-      plist:
+      properties:
         UILaunchScreen: {}
 
     settings:
