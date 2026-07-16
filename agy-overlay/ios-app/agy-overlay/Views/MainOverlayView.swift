@@ -46,12 +46,12 @@ struct MainOverlayView: View {
                             .fill(appState.isConnected ? Color.green : Color.red)
                             .frame(width: 8, height: 8)
                         Text(appState.isConnected ? "Verbunden" : "Verbindung getrennt")
-                            .font(.caption2)
+                            .font(.system(.caption2, design: .monospaced))
                             .foregroundColor(.secondary)
                         Spacer()
                         if let sessionId = appState.currentSessionId {
                             Text("Session: \(sessionId)")
-                                .font(.caption2)
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundColor(.secondary)
                         }
                     }

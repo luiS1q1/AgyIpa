@@ -2,125 +2,121 @@ import SwiftUI
 
 struct ChatModeView: View {
     @EnvironmentObject var appState: AppState
+    @Environment(\.colorScheme) var colorScheme
     @State private var wsManager: WebSocketManager?
     
     let suggestions = [
-        "Schreibe ein Python-Skript",
-        "Erkläre Quantenphysik",
-        "Analysiere den Code"
+        (label: "SCRIPTING_", text: "Schreibe ein Python-Skript_"),
+        (label: "PHYSICS_", text: "Erkläre Quantenphysik_"),
+        (label: "ANALYSIS_", text: "Analysiere den Code_")
     ]
     
     var body: some View {
+        // Theme Colors
+        let bgCanvas = colorScheme == .dark ? Color(red: 19/255, green: 19/255, blue: 19/255) : Color(red: 249/255, green: 249/255, blue: 251/255)
+        let textColor = colorScheme == .dark ? Color(red: 229/255, green: 226/255, blue: 225/255) : Color(red: 26/255, green: 26/255, blue: 26/255)
+        let borderColor = colorScheme == .dark ? Color(red: 34/255, green: 34/255, blue: 34/255) : Color(red: 229/255, green: 229/255, blue: 229/255)
+        let containerBg = colorScheme == .dark ? Color(red: 27/255, green: 28/255, blue: 28/255) : Color(red: 240/255, green: 240/255, blue: 242/255)
+        
         NavigationView {
             ZStack {
-                // Premium Dark Gradient Background
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color(red: 10/255, green: 10/255, blue: 22/255),
-                        Color(red: 22/255, green: 15/255, blue: 38/255),
-                        Color(red: 12/255, green: 8/255, blue: 24/255)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                bgCanvas.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Custom Header Info
+                    // Custom Header Info Bar with 1px Bottom Border
                     HStack {
                         Circle()
                             .fill(appState.isConnected ? Color.green : Color.red)
                             .frame(width: 8, height: 8)
-                            .shadow(color: appState.isConnected ? .green : .red, radius: 4)
                         Text(appState.isConnected ? "Verbunden" : "Verbindung getrennt")
-                            .font(.caption2)
+                            .font(.system(.caption2, design: .monospaced))
                             .foregroundColor(.secondary)
                         
                         Spacer()
                         
                         if let sessionId = appState.currentSessionId {
                             Text("Session: \(sessionId)")
-                                .font(.caption2)
+                                .font(.system(.caption2, design: .monospaced))
                                 .foregroundColor(.secondary)
                         }
                     }
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 20)
                     .padding(.vertical, 8)
-                    .background(Color.black.opacity(0.2))
+                    .background(bgCanvas)
+                    .border(width: 1, edges: [.bottom], color: borderColor)
                     
                     // Main Chat Area
                     ScrollViewReader { proxy in
                         ScrollView {
-                            VStack(alignment: .leading, spacing: 14) {
+                            VStack(alignment: .leading, spacing: 24) {
                                 if appState.chatMessages.isEmpty {
                                     // Gorgeous Welcome Empty State
                                     VStack(spacing: 24) {
                                         Spacer()
                                             .frame(height: 40)
                                         
-                                        ZStack {
-                                            Circle()
-                                                .fill(
-                                                    LinearGradient(
-                                                        colors: [.purple.opacity(0.2), .blue.opacity(0.1)],
-                                                        startPoint: .top,
-                                                        endPoint: .bottom
-                                                    )
-                                                )
-                                                .frame(width: 100, height: 100)
-                                            
+                                        // Square Box Sparkles Icon
+                                        VStack {
                                             Image(systemName: "sparkles")
-                                                .font(.system(size: 44, weight: .semibold))
-                                                .foregroundStyle(
-                                                    LinearGradient(
-                                                        colors: [.purple, .blue],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    )
+                                                .font(.system(size: 32))
+                                                .foregroundColor(textColor)
+                                                .frame(width: 64, height: 64)
+                                                .background(containerBg)
+                                                .overlay(
+                                                    Rectangle()
+                                                        .stroke(borderColor, lineWidth: 1)
                                                 )
                                         }
                                         
                                         VStack(spacing: 8) {
                                             Text("Wie kann ich dir helfen?")
-                                                .font(.title2)
+                                                .font(.custom("Georgia", size: 24))
                                                 .fontWeight(.bold)
-                                                .foregroundColor(.white)
+                                                .foregroundColor(textColor)
                                             
-                                            Text("Antigravity steht bereit, um dich beim Coden und Denken zu unterstützen.")
-                                                .font(.subheadline)
+                                            Text("SYSTEM_READY // AWAITING_INPUT // MODEL: AG-1_")
+                                                .font(.system(.caption, design: .monospaced))
                                                 .foregroundColor(.secondary)
-                                                .multilineTextAlignment(.center)
-                                                .padding(.horizontal, 32)
                                         }
                                         
                                         Spacer()
-                                            .frame(height: 20)
+                                            .frame(height: 16)
                                         
-                                        // Quick Suggestions
+                                        // Quick Suggestions (Sharp Corners, 1px borders)
                                         VStack(spacing: 12) {
-                                            ForEach(suggestions, id: \.self) { suggestion in
+                                            ForEach(suggestions, id: \.label) { suggestion in
                                                 Button(action: {
-                                                    appState.currentInputText = suggestion
+                                                    // Strip trailing underscore if present
+                                                    var text = suggestion.text
+                                                    if text.endsWith("_") {
+                                                        text = String(text.dropLast())
+                                                    }
+                                                    appState.currentInputText = text
                                                 }) {
                                                     HStack {
-                                                        Text(suggestion)
-                                                            .font(.body)
-                                                            .foregroundColor(.white.opacity(0.9))
+                                                        VStack(alignment: .leading, spacing: 4) {
+                                                            Text(suggestion.label)
+                                                                .font(.system(.caption2, design: .monospaced))
+                                                                .fontWeight(.bold)
+                                                                .foregroundColor(.purple)
+                                                            
+                                                            Text(suggestion.text)
+                                                                .font(.custom("Georgia", size: 16))
+                                                                .foregroundColor(textColor)
+                                                        }
                                                         Spacer()
-                                                        Image(systemName: "chevron.right")
+                                                        Image(systemName: "arrow.right")
                                                             .font(.footnote)
                                                             .foregroundColor(.secondary)
                                                     }
-                                                    .padding(.horizontal, 16)
-                                                    .padding(.vertical, 14)
-                                                    .background(Color.white.opacity(0.06))
-                                                    .cornerRadius(14)
+                                                    .padding(16)
+                                                    .background(containerBg)
                                                     .overlay(
-                                                        RoundedRectangle(cornerRadius: 14)
-                                                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                                        Rectangle()
+                                                            .stroke(borderColor, lineWidth: 1)
                                                     )
                                                 }
-                                                .padding(.horizontal, 16)
+                                                .padding(.horizontal, 20)
                                             }
                                         }
                                         
@@ -150,33 +146,38 @@ struct ChatModeView: View {
                     FloatingTextBox()
                 }
             }
-            .navigationTitle("Antigravity Chat")
+            .navigationTitle("ANTIGRAVITY_")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
                         startNewChat()
                     }) {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 6) {
                             Image(systemName: "plus")
-                                .font(.system(size: 14, weight: .bold))
-                            Text("Neuer Chat")
-                                .font(.footnote)
-                                .fontWeight(.semibold)
+                                .font(.system(size: 11, weight: .bold))
+                            Text("NEUER_CHAT_")
+                                .font(.system(.caption, design: .monospaced))
+                                .fontWeight(.bold)
                         }
-                        .foregroundColor(.purple)
-                        .padding(.horizontal, 10)
+                        .foregroundColor(textColor)
+                        .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.purple.opacity(0.15))
-                        .cornerRadius(12)
+                        .background(containerBg)
+                        .overlay(
+                            Rectangle()
+                                .stroke(borderColor, lineWidth: 1)
+                        )
                     }
                 }
                 
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Fertig") {
+                    Button("FERTIG_") {
                         dismissKeyboard()
                     }
+                    .font(.system(.footnote, design: .monospaced))
+                    .foregroundColor(.purple)
                 }
             }
             .onAppear {
@@ -201,6 +202,13 @@ struct ChatModeView: View {
     
     private func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+// Extension helper for String drops
+extension String {
+    func endsWith(_ suffix: String) -> Bool {
+        return self.hasSuffix(suffix)
     }
 }
 
